@@ -52,6 +52,9 @@
 
             <ul class="list-unstyled components mb-5">
                 <li class="{{ Request::is('my-class') || Request::is('dashboard') ? 'active' : '' }}">
+                    <a href=<?= $route . "/my-class" ?>>Kuisioner</a>
+                </li>
+                <li class="{{ Request::is('my-class') || Request::is('dashboard') ? 'active' : '' }}">
                     <a href=<?= $route . "/my-class" ?>>Kelas Saya</a>
                 </li>
                 <li class="{{ Request::is('all-class') ? 'active' : '' }}">
