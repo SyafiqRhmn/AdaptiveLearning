@@ -74,7 +74,7 @@ class PelajarController extends Controller
             'my_classes' => $my_classes,
         ]);
     }
-    
+
     public function ikutiKelas ($classroomID)
     {
         $KelasSiswa = new KelasSiswa;

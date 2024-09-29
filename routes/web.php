@@ -165,7 +165,8 @@ Route::middleware(['auth'])->group(function () {
     // route pelajar non adaptive
     Route::middleware(['pelajarnonpersonalisasi'])->prefix('reguler')->group(function () {
         Route::get('/dashboard/nonpersonalisasi', [PelajarRegulerController::class, 'index']);
-        Route::get('/my-class', [PelajarRegulerController::class, 'index'])->name('reguler.my-class');
+        Route::get('/kuisioner', [PelajarRegulerController::class, 'index'])->name('reguler.kuisioner');
+        Route::get('/my-class', [PelajarRegulerController::class, 'my_class'])->name('reguler.my-class');
         Route::get('/my-class/{classroom}', [PelajarRegulerController::class, 'my_classReguler'])->name('reguler.my-class.classroom');
         Route::get('/all-class', [PelajarRegulerController::class, 'allClassReguler'])->name('reguler.all-class');
         Route::get('/all-class/{classroom}/ikuti', [PelajarRegulerController::class, 'ikutiKelasReguler'])->name('reguler.all-class.ikuti');

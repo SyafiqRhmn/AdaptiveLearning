@@ -51,8 +51,8 @@
         @endphp
 
             <ul class="list-unstyled components mb-5">
-                <li class="{{ Request::is('my-class') || Request::is('dashboard') ? 'active' : '' }}">
-                    <a href=<?= $route . "/my-class" ?>>Kuisioner</a>
+                <li class="{{ Request::is('kuisioner') || Request::is('dashboard') ? 'active' : '' }}">
+                    <a href=<?= $route . "/kuisioner" ?>>Kuisioner</a>
                 </li>
                 <li class="{{ Request::is('my-class') || Request::is('dashboard') ? 'active' : '' }}">
                     <a href=<?= $route . "/my-class" ?>>Kelas Saya</a>

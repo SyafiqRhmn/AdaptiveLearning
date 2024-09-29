@@ -10,6 +10,7 @@ use App\Models\PostTest;
 use App\Models\Question;
 use App\Models\Classroom;
 use App\Models\KelasSiswa;
+use App\Models\Kuisioner;
 use App\Models\CourseTest;
 use App\Models\NilaiPelajar;
 use Illuminate\Http\Request;
@@ -23,12 +24,16 @@ class PelajarRegulerController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
-        $my_class = User::find($userId)->kelasSiswa;
-        return view('dashboard.nonpersonalisasi.index', [
-            'title' => 'Dashboard pelajar reguler',
-            'classrooms' => $my_class,
-            'myClassrooms' => null
+        $kuisioner = kuisioner::all();
+        $no = 1;
+        // $my_class = User::find(Auth::id())->kelasSiswa;
+        // $my_classes = $my_class->pluck('classroom_id')->toArray();
+        return view('dashboard.nonpersonalisasi.kuisioner', [
+            'title' => 'Dashboard Kuisioner',
+            'kuisioner' => $kuisioner,
+            'no' => $no,
+            // 'classrooms' => Classroom::paginate(10),
+            // 'my_classes' => $my_classes,
         ]);
     }
     public function setting_akun()
@@ -38,6 +43,16 @@ class PelajarRegulerController extends Controller
         return view('dashboard.nonpersonalisasi.setting.setting_akun',[
             'title'=> 'Setting Akun',
             'myprofile' => $myprofile
+        ]);
+    }
+    public function my_class ()
+    {
+        $userId = Auth::id();
+        $my_class = User::find($userId)->kelasSiswa;
+        return view('dashboard.nonpersonalisasi.index', [
+            'title' => 'Dashboard pelajar reguler',
+            'classrooms' => $my_class,
+            'myClassrooms' => null
         ]);
     }
     public function edit_akun($userID)
