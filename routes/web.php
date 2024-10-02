@@ -15,6 +15,8 @@ use App\Http\Controllers\PostTestController;
 use App\Http\Controllers\CourseTestController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\QuesionerPelajarController;
+use App\Http\Controllers\QuesionerGuruController;
 use App\Http\Controllers\SoalJabawanController;
 use App\Http\Controllers\SoalJawabanController;
 use App\Http\Controllers\PelajarRegulerController;
@@ -91,6 +93,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/logout', [AuthController::class, 'logout']);
     // route grup guru
     Route::middleware(['guru'])->group(function () {
+        Route::resource('/quesioner/qu-guru', QuesionerGuruController::class);
+        Route::resource('/quesioner/qu-pelajar', QuesionerPelajarController::class);
         Route::resource('/classroom', ClassroomController::class);
         Route::resource('/subject', SubjectController::class);
         Route::resource('/test/pre-test', PreTestController::class);

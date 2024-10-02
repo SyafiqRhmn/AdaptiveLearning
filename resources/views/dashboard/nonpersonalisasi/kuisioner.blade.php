@@ -14,7 +14,7 @@
             <div class="card-body">
               <h5 class="card-title">Pengisian Kuisioner</h5>
               <!-- <p class="card-text">Harap melakukan pengisian kuisioner terlebih dahulu</p> -->
-              <table class="table table-bordered">
+              <table class="table table-striped table-hover my-4 mt-2">
               <thead>
                   <tr>
                       <th scope="col" class="align-middle text-center" rowspan="2">No</th>
@@ -39,24 +39,23 @@
                         {{ $kuisioner->pertanyaan }}
                         </td>
                         <td class="text-center">
-                              <label><input type="radio" id='regular' name="optradio"></label>
-                          
+                            <label><input type="radio" name="answers[{{ $kuisioner->id }}]" value="1"></label>
                         </td>
                         <td class="text-center">
-                              <label><input type="radio" id='regular' name="optradio"></label>
-                          
+                            <label><input type="radio" name="answers[{{ $kuisioner->id }}]" value="2"></label>
                         </td>
                         <td class="text-center">
-                              <label><input type="radio" id='regular' name="optradio"></label>
+                            <label><input type="radio" name="answers[{{ $kuisioner->id }}]" value="3"></label>
                         </td>
                         <td class="text-center">
-                              <label><input type="radio" id='regular' name="optradio"></label>
+                            <label><input type="radio" name="answers[{{ $kuisioner->id }}]" value="4"></label>
                         </td>
                       </tr>
                   </form>
                   @endforeach
                 </tbody>
               </table>
+              <button type="submit" class="btn pull-right btn-info">Kirim</button>
             </div>              
           </div>
         </div>

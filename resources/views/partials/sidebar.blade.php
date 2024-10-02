@@ -6,6 +6,17 @@
         {{ Auth::user()->name }}!</p>
         @can('guru')
             <ul class="list-unstyled components mb-5">
+                <li class="{{ Request::is('quesioner*') ? 'active' : '' }}">
+                    <a href="#pagetests" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">Quesioner</a>
+                    <ul class="collapse list-unstyled {{ Request::is('quesioner*') ? 'show' : '' }}" id="pagetests">
+                    <li class="{{ Request::is('quesioner/qu-guru*') ? 'active' : '' }}">
+                        <a href="/quesioner/qu-guru">Quesioner Guru</a>
+                    </li>
+                    <li class="{{ Request::is('quesioner/qu-pelajar*') ? 'active' : '' }}">
+                        <a href="/quesioner/qu-pelajar">Quesioner Pelajar</a>
+                    </li>
+                    </ul>
+                </li>
                 <li class="{{ Request::is('classroom') ? 'active' : '' }}">
                     <a href="/classroom">Classroom</a>
                 </li>
