@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Answer;
+use App\Models\AnswerKuisioner;
+use App\Models\Ev;
 use App\Models\PreTest;
 use App\Models\Subject;
 use App\Models\PostTest;
@@ -24,18 +26,225 @@ class PelajarRegulerController extends Controller
 {
     public function index()
     {
-        $kuisioner = kuisioner::all();
+        // $kuisioner = kuisioner::pluck('id');
         $no = 1;
-        // $my_class = User::find(Auth::id())->kelasSiswa;
-        // $my_classes = $my_class->pluck('classroom_id')->toArray();
+        //mengecek apakah tabel jawaban kuisioner ada berdasarkan id
+        $kriteriaExists = User::find(Auth::id())->answerKuisioners()->exists();
+        //mengambil data jawaban berdasarkan id
+        $jawaban = User::find(Auth::id())->answerKuisioners;
+        
+        $resultcalculate = $this->calculateMatrix();
+        // dd($resultcalculate['matrix_ideal']);
+        // Perkalian matriks
+        $resultKuisioner = $this->showResults();
         return view('dashboard.nonpersonalisasi.kuisioner', [
             'title' => 'Dashboard Kuisioner',
-            'kuisioner' => $kuisioner,
+            // 'kuisioner' => $kuisioner,
+            'jawaban' => $jawaban,
             'no' => $no,
+            'matrix' => $resultKuisioner['matrix'],
+            'normalized_matrix' => $resultKuisioner['normalized_matrix'],
+            'kriteriaExists' => $kriteriaExists,
+            'bobot' => $resultcalculate['matrix'],
+            'matrix_ideal' => $resultcalculate['matrix_ideal'],
+            'ideal_positif' => $resultcalculate['ideal_positif'],
+            'ideal_negatif' => $resultcalculate['ideal_negatif'],
+            'preferensi' => $resultcalculate['preferensi'],
+            'ranking' => $resultcalculate['ranking'],
             // 'classrooms' => Classroom::paginate(10),
             // 'my_classes' => $my_classes,
         ]);
     }
+
+    public function saveKuisioner(Request $request)
+    {
+
+        
+        $validatedData = $request->validate([
+            'answers' => 'required|array', // Pastikan ada array untuk jawaban
+            'answers.*' => 'required|integer|between:1,5',
+        ]);
+        // Menyimpan jawaban ke database
+        foreach ($validatedData['answers'] as $questionId => $value) {
+            AnswerKuisioner::create([
+                'kuisioners_id' => $questionId, // ID pertanyaan dari kuisioner
+                'value' => $value, // Nilai jawaban
+                'user_id' => Auth::id(),
+            ]);
+        }
+
+        // // Save the user to the database
+        // $quesioner->save();
+
+        // Redirect the user to the home page with a success message
+        return redirect()->back()->with('success', 'Answer Quisioner has been added!');
+    }
+
+    // MENAMPILKAN NILAI KUISIONER
+    public function showResults()
+    {
+        // Mengambil semua data kuisioner dari database
+        $answers = User::find(Auth::id())->answerKuisioners;
+         // Inisialisasi matriks
+        $matrix = [
+            'V' => [],
+            'A' => [],
+            'K' => [],
+        ];
+
+        foreach ($answers as $answer) {
+
+            // Menyusun nilai berdasarkan kuisioners_id
+            if ($answer->kuisioners_id >= 1 && $answer->kuisioners_id <= 5) {
+                // Menyimpan nilai pada kriteria V
+                $matrix['V'][$answer->kuisioners_id] = $answer->value;
+            } elseif ($answer->kuisioners_id >= 6 && $answer->kuisioners_id <= 10) {
+                // Menyimpan nilai pada kriteria A
+                $matrix['A'][$answer->kuisioners_id - 5] = $answer->value; // Mengurangi 5 untuk mendapatkan index 1-5
+            } elseif ($answer->kuisioners_id >= 11 && $answer->kuisioners_id <= 15) {
+                // Menyimpan nilai pada kriteria K
+                $matrix['K'][$answer->kuisioners_id - 10] = $answer->value; // Mengurangi 10 untuk mendapatkan index 1-5
+            }
+        }
+        
+
+        // Menghitung normalisasi
+        $normalized_matrix = [];
+        foreach ($matrix['V'] as $index => $value) {
+            // Ambil nilai V, A, dan K
+            $vValue = $matrix['V'][$index] ?? 0; // Nilai V
+            $aValue = $matrix['A'][$index] ?? 0; // Nilai A
+            $kValue = $matrix['K'][$index] ?? 0; // Nilai K
+
+            // Normalisasi
+            $denominator = sqrt(pow($vValue, 2) + pow($aValue, 2) + pow($kValue, 2));
+            $normalized_v = ($denominator != 0) ? $vValue / $denominator : 0;
+            $normalized_a = ($denominator != 0) ? $aValue / $denominator : 0;
+            $normalized_k = ($denominator != 0) ? $kValue / $denominator : 0;
+
+            // Simpan hasil normalisasi
+            $normalized_matrix['V'][] = $normalized_v;
+            $normalized_matrix['A'][] = $normalized_a;
+            $normalized_matrix['K'][] = $normalized_k;
+        }
+
+        return ([
+            'matrix' => $matrix,
+            'normalized_matrix' => $normalized_matrix,
+        ]);
+    }
+    public function calculateMatrix()
+    {
+        $resultKuisioner = $this->showResults();
+        $normalized_matrix = $resultKuisioner['normalized_matrix'];
+        // Ambil semua nilai ev dan answers berdasarkan kuisioners_id
+        $answers = User::find(Auth::id())->answerKuisioners;
+        // dd($normalized_matrix);
+        $evValues = Ev::with('answers')->get();
+    
+        // Inisialisasi matriks
+        $matrix = [
+            'V' => [],
+            'A' => [],
+            'K' => [],
+        ];
+    
+        // Buat array untuk menyimpan ev_value berdasarkan kuisioners_id
+        $evValueMap = [];
+        foreach ($evValues as $ev) {
+            $evValueMap[$ev->kuisioners_id] = $ev->ev_value; // Simpan ev_value berdasarkan kuisioners_id
+        }
+
+        // Iterasi untuk mengisi matriks dan mengalikan nilai
+        foreach ($answers as $answer) {
+            $kuisionersId = $answer->kuisioners_id;
+
+            if ($kuisionersId >= 1 && $kuisionersId <= 5) {
+                // Menyimpan nilai pada kriteria V
+                $index = $kuisionersId - 1; // Sesuaikan dengan indeks 0
+                $matrix['V'][$index] = $normalized_matrix['V'][$index] * ($evValueMap[$kuisionersId] ?? 0); // Kalikan dengan ev_value
+            } elseif ($kuisionersId >= 6 && $kuisionersId <= 10) {
+                // Menyimpan nilai pada kriteria A
+                $index = $kuisionersId - 6; // Sesuaikan dengan indeks 0
+                $matrix['A'][$index] = $normalized_matrix['A'][$index] * ($evValueMap[$kuisionersId] ?? 0); // Kalikan dengan ev_value
+            } elseif ($kuisionersId >= 11 && $kuisionersId <= 15) {
+                // Menyimpan nilai pada kriteria K
+                $index = $kuisionersId - 11; // Sesuaikan dengan indeks 0
+                $matrix['K'][$index] = $normalized_matrix['K'][$index] * ($evValueMap[$kuisionersId] ?? 0); // Kalikan dengan ev_value
+            }
+        }
+        // Inisialisasi array untuk menyimpan hasil akhir
+        $matrix_ideal = [];
+        for ($i = 0; $i < 5; $i++) { // Misalkan Anda memiliki 5 indeks
+        $matrix_ideal[$i] = [
+            'max' => max(
+                $matrix['V'][$i] ?? 0,
+                $matrix['A'][$i] ?? 0,
+                $matrix['K'][$i] ?? 0
+            ),
+            'min' => min(
+                $matrix['V'][$i] ?? PHP_INT_MAX, // Gunakan PHP_INT_MAX untuk memastikan minimum benar
+                $matrix['A'][$i] ?? PHP_INT_MAX,
+                $matrix['K'][$i] ?? PHP_INT_MAX
+            ),
+        
+        ];
+        }
+        // Inisialisasi jarak ideal
+        $poinCount = count($matrix['V']); 
+        $ideal_positif = [];
+        $ideal_negatif = [];
+        // Hitung jarak ideal
+        foreach (['V', 'A', 'K'] as $kriteria) {
+            $ideal_positif[$kriteria] = 0; // Inisialisasi untuk kriteria ini
+            $ideal_negatif[$kriteria] = 0; // Inisialisasi untuk kriteria ini
+            
+            for ($i = 0; $i < $poinCount; $i++) {
+                // Hitung D+ (jarak ke ideal positif)
+                $ideal_positif[$kriteria] += pow(($matrix[$kriteria][$i] ?? 0) - $matrix_ideal[$i]['max'], 2);
+                // Hitung D- (jarak ke ideal negatif)
+                $ideal_negatif[$kriteria] += pow(($matrix[$kriteria][$i] ?? 0) - $matrix_ideal[$i]['min'], 2);
+            }
+        }
+
+        // Mengambil akar kuadrat dari total D+ dan D-
+        foreach (['V', 'A', 'K'] as $kriteria) {
+            $ideal_positif[$kriteria] = sqrt($ideal_positif[$kriteria]);
+            $ideal_negatif[$kriteria] = sqrt($ideal_negatif[$kriteria]);
+        }
+
+        // Inisialisasi array untuk menyimpan nilai preferensi
+        $preferensi = [];
+
+        // Hitung preferensi untuk setiap kriteria
+        foreach (['V', 'A', 'K'] as $kriteria) {
+            // Pastikan ideal_positif dan ideal_negatif adalah angka bukan array
+            $preferensi[$kriteria] = $ideal_negatif[$kriteria] / 
+                (($ideal_positif[$kriteria] + $ideal_negatif[$kriteria]) > 0 
+                    ? ($ideal_positif[$kriteria] + $ideal_negatif[$kriteria]) 
+                    : 1); // Hindari pembagian dengan nol
+        }
+
+        // Mengurutkan preferensi dan menentukan ranking
+        arsort($preferensi); // Mengurutkan preferensi secara menurun
+        // Mengonversi ranking ke dalam format 1, 2, 3
+        $ranking = [];
+        $counter = 1;
+        foreach (array_keys($preferensi) as $key) {
+            $ranking[$key] = $counter++; // Menetapkan nilai ranking 1, 2, 3
+        }
+
+        // Debugging untuk memeriksa hasil
+        return ([
+            'matrix' => $matrix,
+            'matrix_ideal' => $matrix_ideal,
+            'ideal_positif' => $ideal_positif,
+            'ideal_negatif' => $ideal_negatif,
+            'preferensi' => $preferensi,
+            'ranking'   => $ranking
+        ]);
+    }
+        
     public function setting_akun()
     {
         $userId = Auth::id();

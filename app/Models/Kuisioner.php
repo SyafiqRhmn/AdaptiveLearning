@@ -16,4 +16,9 @@ class Kuisioner extends Model
         return $this->belongsTo(kuisioner::class);
     }
 
+    // Relasi dengan model Answer
+    public function answers()
+    {
+        return $this->hasMany(AnswerKuisioner::class, 'kuisioners_id');
+    }
 }

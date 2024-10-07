@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     // route grup guru
     Route::middleware(['guru'])->group(function () {
         Route::resource('/quesioner/qu-guru', QuesionerGuruController::class);
+        Route::post('/quesioner/qu-guru/matrix', [QuesionerGuruController::class, 'storeMatrix'])->name('qu-guru.matrix');
         Route::resource('/quesioner/qu-pelajar', QuesionerPelajarController::class);
         Route::resource('/classroom', ClassroomController::class);
         Route::resource('/subject', SubjectController::class);
@@ -169,6 +170,7 @@ Route::middleware(['auth'])->group(function () {
     // route pelajar non adaptive
     Route::middleware(['pelajarnonpersonalisasi'])->prefix('reguler')->group(function () {
         Route::get('/dashboard/nonpersonalisasi', [PelajarRegulerController::class, 'index']);
+        Route::post('/dashboard/nonpersonalisasi/kuisioner', [PelajarRegulerController::class, 'saveKuisioner'])->name('reguler.saveKuisioner');;
         Route::get('/kuisioner', [PelajarRegulerController::class, 'index'])->name('reguler.kuisioner');
         Route::get('/my-class', [PelajarRegulerController::class, 'my_class'])->name('reguler.my-class');
         Route::get('/my-class/{classroom}', [PelajarRegulerController::class, 'my_classReguler'])->name('reguler.my-class.classroom');

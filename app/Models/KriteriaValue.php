@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class QuesionerPelajar extends Model
+class KriteriaValue extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
     // Tentukan nama tabel jika berbeda dengan default Laravel
-    protected $table = 'kuisioners'; // Sesuaikan dengan nama tabel yang ada di database
+    protected $table = 'kuisioners_values'; // Sesuaikan dengan nama tabel yang ada di database
 
-    public function quesioner()
+    public function kriteriavalue()
     {
-        return $this->belongsTo(kuisioner::class);
+        return $this->belongsTo(kuisioners_values::class);
     }
+
 }

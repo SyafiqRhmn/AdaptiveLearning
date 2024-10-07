@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class QuesionerPelajar extends Model
+class QuesionerGuru extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
@@ -16,5 +16,10 @@ class QuesionerPelajar extends Model
     public function quesioner()
     {
         return $this->belongsTo(kuisioner::class);
+    }
+
+    public function ev()
+    {
+        return $this->hasMany(Ev::class);
     }
 }

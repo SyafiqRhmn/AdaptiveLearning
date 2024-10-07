@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(KelasSiswa::class);
     }
+
+    public function answerKuisioners()
+    {
+        return $this->hasMany(AnswerKuisioner::class, 'user_id'); // Pastikan kolom 'user_id' ada di tabel 'answers_kuisioners'
+    }
 }
