@@ -11,19 +11,18 @@
         <div class="row">
             <div class="col">
               <div class="card p-4">
-              @if ($isModulTerbuka)
+              @if($isModulTerbuka)
                 <h3>{{ $classroom->name }}</h3>
-                <a href="{{ route('reguler.pdf', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;" onclick="startTimer('{{ $subject->id }}');">PDF</a>
-                <a href="{{ route('reguler.video_link', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;"onclick="videostartTimer('{{ $subject->id }}');">Video</a>
-                <a href="{{ route('reguler.interpreter', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;"onclick="interpreterstartTimer('{{ $subject->id }}');">Interpreter</a>
-                @else
-                <!-- Tampilkan pesan bahwa modul terkunci -->
-                <p>Modul ini terkunci. Silakan kerjakan ulang latihan di modul sebelumnya hingga nilai lebih dari 70 untuk membukanya.</p>
-                <div style="display: flex; justify-content: space-between;">
-                <a href="{{ route('reguler.modulsebelumnya', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 210px;">Modul Sebelumnya</a>
-                <a href="{{ route('reguler.modulpertama', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 250px;">Pelajari Ulang Seluruhnya</a>
-                </div>
+                @if($ranking['V'] == 1)
+                <a href="{{ route('reguler.pdf', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;" onclick="startTimer('{{ $subject->id }}');">Visual</a>
+                @elseif($ranking['A'] == 1)
+                <a href="{{ route('reguler.video_link', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;"onclick="videostartTimer('{{ $subject->id }}');">Auditori</a>
+                @elseif($ranking['K'] == 1)
+                <a href="{{ route('reguler.interpreter', ['subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;"onclick="interpreterstartTimer('{{ $subject->id }}');">Kinestetik</a>
                 @endif
+              @else
+                  <p>Modul belum terbuka.</p>
+              @endif
               </div>              
             </div>
         </div>

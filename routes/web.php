@@ -184,7 +184,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('subjecttest/{test}/{questID}/question', [PelajarRegulerController::class, 'Regulersubjecttest'])->name('reguler.subjecttest.question');
         Route::post('subjecttest/{test}/{testID}', [PelajarRegulerController::class, 'Regulersubmit_subjecttest'])->name('reguler.subjecttest.submit');
         Route::get('/classroom/{classroomID}/out', [PelajarRegulerController::class, 'Regulerclassroom_out'])->name('reguler.classroom.out');
-        Route::get('/susun-jalur-pembelajaran', [PelajarRegulerController::class, 'susun_jalur_pembelajaran'])->name('reguler.susun-jalur-pembelajaran');
+        Route::get('/susun-jalur-pembelajaran/{testID}', [PelajarRegulerController::class, 'susun_jalur_pembelajaran'])->name('reguler.susun-jalur-pembelajaran');
         Route::get('/get-modules', [PelajarRegulerController::class, 'getModules'])->name('reguler.getmodules');
         Route::put('/save-modules', [PelajarRegulerController::class, 'saveModules'])->name('reguler.save_modules');
         Route::get('/pelajari-pdf/{subjectID}',[PelajarRegulerController::class,'pdf'])->name('reguler.pdf');

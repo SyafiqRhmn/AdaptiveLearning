@@ -26,7 +26,7 @@ class PelajarRegulerController extends Controller
 {
     public function index()
     {
-        // $kuisioner = kuisioner::pluck('id');
+        $kuisioner = kuisioner::All();
         $no = 1;
         //mengecek apakah tabel jawaban kuisioner ada berdasarkan id
         $kriteriaExists = User::find(Auth::id())->answerKuisioners()->exists();
@@ -39,7 +39,7 @@ class PelajarRegulerController extends Controller
         $resultKuisioner = $this->showResults();
         return view('dashboard.nonpersonalisasi.kuisioner', [
             'title' => 'Dashboard Kuisioner',
-            // 'kuisioner' => $kuisioner,
+            'kuisioner' => $kuisioner,
             'jawaban' => $jawaban,
             'no' => $no,
             'matrix' => $resultKuisioner['matrix'],
@@ -133,6 +133,7 @@ class PelajarRegulerController extends Controller
             'normalized_matrix' => $normalized_matrix,
         ]);
     }
+
     public function calculateMatrix()
     {
         $resultKuisioner = $this->showResults();
@@ -317,62 +318,77 @@ class PelajarRegulerController extends Controller
     {
         $class = Classroom::where('id', $classroomID)->get()[0];
         $user = auth()->user();
-        $startSubject = $user->id_modul_awal_reguler;
-        $subjects = JalurPembelajaran::where('user_id', Auth::id())  
-        ->whereHas('subject', function ($query) use ($classroomID) {
-        $query->where('classroom_id', $classroomID); })->orderBy('id')->get();
-        if ($subjects->isEmpty()) {
-            $subjects = Subject::where('classroom_id', $classroomID)->get();
-        }
-        $hasilTestPelajar = HasilTestPelajar::where('user_id', Auth::user()->id)->where('testable_type', 'pre-test')->get();
-        $test = null;
-        if ($hasilTestPelajar !== null) {
-            foreach ($hasilTestPelajar as $htp) {
-                echo $htp->classroom_id;
-                $pt = PreTest::where('id', $htp->testable_id)->first();
-                if ($pt !== null && $pt->classroom_id == $classroomID) {
-                    $test = $pt;
-                }
-            }
-        }
+        // $startSubject = $user->id_modul_awal_reguler;
+        // $subjects = JalurPembelajaran::where('user_id', Auth::id())  
+        // ->whereHas('subject', function ($query) use ($classroomID) {
+        // $query->where('classroom_id', $classroomID); })->orderBy('id')->get();
+        // if ($subjects->isEmpty()) {
+        $subjects = Subject::where('classroom_id', $classroomID)->get();
+        // }
+        
+        // $hasilTestPelajar = HasilTestPelajar::where('user_id', Auth::user()->id)->where('testable_type', 'pre-test')->get();
+        // $test = null;
+        // if ($hasilTestPelajar !== null) {
+        //     foreach ($hasilTestPelajar as $htp) {
+        //         echo $htp->classroom_id;
+        //         $pt = PreTest::where('id', $htp->testable_id)->first();
+        //         if ($pt !== null && $pt->classroom_id == $classroomID) {
+        //             $test = $pt;
+        //         }
+        //     }
+        // }
+        // $subjects = JalurPembelajaran::where('user_id', Auth::id())
+        // ->whereHas('subject', function ($query) use ($classroomID) {
+        //     $query->where('classroom_id', $classroomID);
+        // })->orderBy('id')->get();
+
+        // if ($subjects->isEmpty()) {
+        //     $subjects = Subject::where('classroom_id', $classroomID)->get();
+        // }
+        // Cek apakah pre-test sudah dikerjakan untuk user di class ini
+        $pretest = HasilTestPelajar::where('user_id', Auth::id())
+        ->where('testable_type', 'pre-test')
+        ->where('testable_id', $classroomID)
+        ->first();
         return view('dashboard.nonpersonalisasi.class', [
             'title' => $class->name,
             'classroomID' => $classroomID,
-            'test' => $test,
+            // 'test' => $test,
             'class' => $class,
             'subjects' => $subjects,
-            'startSubject'=> $startSubject,
+            'pretest' => $pretest, // Kirim hasil pretest
+            // 'startSubject'=> $startSubject,
         ]);
     }
 
     public function Regulertest_do($jenis_test, $classroomID)
-    {
-        $class = Classroom::where('id', $classroomID)->first();
-        $testID = PreTest::where('id', $classroomID)->first()->id;
-        $user = auth()->user();
-        $startSubjectID = $user->id_modul_awal_reguler;
-        $endSubjectID = $user->id_modul_tujuan_reguler;
-        $questions = Question::where('testable_type', $jenis_test)
-        ->where('subject_id', '>=', $startSubjectID)
-        ->where('subject_id', '<=', $endSubjectID)
+{
+    $class = Classroom::where('id', $classroomID)->first();
+    $testID = PreTest::where('id', $classroomID)->first()->id;
+    $user = auth()->user();
+
+    // Mengambil semua pertanyaan untuk kelas dan jenis test yang sesuai
+    $questions = Question::where('testable_type', $jenis_test)
         ->where('testable_id', $testID)
         ->get();
-        $result = array();
-        $result_choose = array();
-            foreach ($questions as $key) {
-             $result[$key->id] = null;
-             }
-            return view('dashboard.nonpersonalisasi.test.test', [
-            'title' => $jenis_test.' '.$class->name,
-             // 'alert' => 'Ujian akan dimulai, mohon kerjakan dengan sungguh-sungguh dan jujur.',
-            'jenis_test' => $jenis_test,
-            'testID' => $testID,
-            'questions' => $questions,
-            'result' => $result,
-            'result_choose' => $result_choose,
-            'question' => $questions[0],
-                    ]);
-            }
+
+    $result = array();
+    $result_choose = array();
+    
+    foreach ($questions as $key) {
+        $result[$key->id] = null;
+    }
+
+    return view('dashboard.nonpersonalisasi.test.test', [
+        'title' => $jenis_test . ' ' . $class->name,
+        'jenis_test' => $jenis_test,
+        'testID' => $testID,
+        'questions' => $questions,
+        'result' => $result,
+        'result_choose' => $result_choose,
+        'question' => $questions->isNotEmpty() ? $questions[0] : null, // Cek jika ada pertanyaan
+    ]);
+}
 
     public function Regulertest (Request $request, $jenis_test, $question_target)
     {
@@ -385,13 +401,13 @@ class PelajarRegulerController extends Controller
         
         $question = Question::where('id', $question_target)->first();
         $user = auth()->user();
-        $startSubjectID = $user->id_modul_awal_reguler;
-        $endSubjectID = $user->id_modul_tujuan_reguler;
+        // $startSubjectID = $user->id_modul_awal_reguler;
+        // $endSubjectID = $user->id_modul_tujuan_reguler;
         $question = Question::where('id', $question_target)->first();
         $questions = Question::where('testable_type', $jenis_test)
         ->where('testable_id', $request->testID)
-        ->where('subject_id', '>=', $startSubjectID)
-        ->where('subject_id', '<=', $endSubjectID)
+        // ->where('subject_id', '>=', $startSubjectID)
+        // ->where('subject_id', '<=', $endSubjectID)
         ->get();
         return view('dashboard.nonpersonalisasi.test.test', [
             'title' => 'Pre test '.$request->title,
@@ -404,54 +420,55 @@ class PelajarRegulerController extends Controller
         ]);
     }
 
-    public function Regulersubmit_test (Request $request, $jenis_test, $testID) 
+    public function Regulersubmit_test(Request $request, $jenis_test, $testID) 
     {
         $user_id = Auth::id();
         $user = auth()->user();
-        $startSubjectID = $user->id_modul_awal_reguler;
-        $endSubjectID = $user->id_modul_tujuan_reguler;
         $result = json_decode($request->input('result'), true);
+        // Ambil semua modul berdasarkan classroom_id
+        $subject_ids = Subject::where('classroom_id', $testID)->pluck('id');
 
-        // proses untuk mencari nilai tiap subject dan memasukkan data nya ke dalam tabel nilai_pelajars
+        // Proses untuk mencari nilai tiap subject dan memasukkan data nya ke dalam tabel nilai_pelajars
         $questions = Question::where('testable_type', $jenis_test)
-        ->where('testable_id', $request->testID)
-        ->where('subject_id', '>=', $startSubjectID)
-        ->where('subject_id', '<=', $endSubjectID)
-        ->get();
+            ->where('testable_id', $testID)
+            ->whereIn('subject_id', $subject_ids) // Menggunakan whereIn untuk mengambil pertanyaan dari modul yang sesuai
+            ->get();
+        
         $data = [];
         foreach ($questions as $question) {
             $id_question = $question->id;
             $benar_salah = $request->input('result.' . $id_question);
-            $nilai = 0;
-            if ($benar_salah === 'benar') {
-                $nilai += 1;
-            }
-            $subject_id = $questions->find($id_question)->subject_id;
+            $nilai = ($benar_salah === 'benar') ? 1 : 0; // Menggunakan ternary operator untuk menghitung nilai
+            $subject_id = $question->subject_id; // Ambil subject_id dari question
             
             if (isset($data[$subject_id])) {
                 $data[$subject_id]['nilai'] += $nilai;
             } else {
-                $item = [
+                $data[$subject_id] = [
                     'user_id' => $user_id,
                     'subject_id' => $subject_id,
                     'nilai' => $nilai,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-                $data[$subject_id] = $item;
             }
         }
+
+        // Simpan data nilai ke tabel
         DB::table('nilai_pelajars')->insert($data);
-        
+
+        // Hitung skor total
         $totalQuestions = count($result);
         $score = 0;
-        foreach ($result as $questionId => $answer) {
+        foreach ($result as $answer) {
             if ($answer === "benar") {
-                $score += 1;
+                $score++;
             }
         }
+
         $skor = round(($score / $totalQuestions) * 100, 2);
-        
+
+        // Simpan hasil test
         $htp = new HasilTestPelajar;
         $htp->user_id = $user_id;
         $htp->testable_type = $jenis_test;
@@ -459,18 +476,20 @@ class PelajarRegulerController extends Controller
         $htp->score = $skor;
         $htp->save();
 
+        // Ambil data test sesuai dengan jenisnya
         $test = null;
         if ($jenis_test === 'pre-test') {
             $test = PreTest::find($testID);
-        }elseif($jenis_test === 'post-test'){
+        } elseif ($jenis_test === 'post-test') {
             $test = PostTest::find($testID);
         } else {
             $test = CourseTest::find($testID);
         }
-        
+    
         return view('dashboard.nonpersonalisasi.test.done', [
             'title' => 'Test',
             'jenis_test' => $jenis_test,
+            'testID' => $testID,
             'nama_test' => $test->name,
             'skor' => $skor,
         ]);
@@ -485,11 +504,15 @@ class PelajarRegulerController extends Controller
         $classroom = Classroom::find($subject->classroom_id);
         $isModulTerbuka = $jalurPembelajaran->status === 'terbuka';
     
+        // Memanggil kembali metode perhitungan ranking dari controller lain
+        $resultcalculate = $this->calculateMatrix(); // Pastikan metode ini bisa diakses
+        $ranking = $resultcalculate['ranking'];
         return view('dashboard.nonpersonalisasi.modul_class', [
             'title' => 'Pelajari Materi',
             'classroom' => $classroom,
             'subject' => $subject,
             'isModulTerbuka' => $isModulTerbuka,
+            'ranking' => $ranking, // Mengirimkan ranking ke view
         ]);
     }
     public function startTimer($subjectID)
@@ -939,32 +962,27 @@ class PelajarRegulerController extends Controller
 ]);
 
     }
-    public function susun_jalur_pembelajaran()
-{
-    $user_id = Auth::id();
-    $user = auth()->user();
-    $startSubjectID = $user->id_modul_awal_reguler;
-    $endSubjectID = $user->id_modul_tujuan_reguler;
-    $subject_ids = Subject::where('id', '>=', $startSubjectID)
-    ->where('id', '<=', $endSubjectID)
-    ->pluck('id');
-
-   
-    foreach ($subject_ids as $index => $subject_id) {
-        $jalur_pembelajaran = new JalurPembelajaran;
-        $jalur_pembelajaran->user_id = $user_id;
-        $jalur_pembelajaran->subject_id = $subject_id;
-        
-
-        if ($index === 0) {
-            $jalur_pembelajaran->status = 'terbuka'; // Modul pertama
-        } else {
-            $jalur_pembelajaran->status = 'terkunci';
+    public function susun_jalur_pembelajaran($classroomID)
+    {
+        $user_id = Auth::id();
+        $user = auth()->user();
+    
+        // Ambil modul yang sesuai dengan classroom_id pengguna
+        $subject_ids = Subject::where('classroom_id', $classroomID)->pluck('id');
+    
+        foreach ($subject_ids as $index => $subject_id) {
+            $jalur_pembelajaran = new JalurPembelajaran;
+            $jalur_pembelajaran->user_id = $user_id;
+            $jalur_pembelajaran->subject_id = $subject_id;
+    
+            // Set status modul pertama terbuka, lainnya terkunci
+            $jalur_pembelajaran->status = 'terbuka';
+    
+            $jalur_pembelajaran->save();
         }
-
-        $jalur_pembelajaran->save();
+        
+        return redirect()->route('reguler.my-class');
     }
-    return redirect()->route('reguler.my-class');
-}
+    
 
     }

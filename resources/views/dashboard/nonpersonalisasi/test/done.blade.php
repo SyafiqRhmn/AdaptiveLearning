@@ -14,7 +14,7 @@
                 <center><b>Selamat!</b> Telah selesai mengerjakan soal {{ $nama_test }}. <br>
                 Skor anda adalah: <br><br>
                 <span class="text-center bg-info p-3 m-2 fs-1 rounded-3 text-light">{{ $skor }}</span> <br><br><br>
-                <a href="{{ route('reguler.susun-jalur-pembelajaran') }}" class="btn btn-success">Test Selesai</a> <br>
+                <a href="{{ route('reguler.susun-jalur-pembelajaran',  ['testID' => $testID]) }}" class="btn btn-success">Test Selesai</a> <br>
                 <!-- <i style="color: red">*Silahkan klik tombol diatas untuk menyusun jalur pembelajaran yang sesuai dengan kompetensimu.</i> -->
                 </center>
               </div>              
