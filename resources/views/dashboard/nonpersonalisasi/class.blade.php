@@ -15,7 +15,14 @@
                                 <i class="fa fa-bars"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item" href="{{ route('reguler.test.do', ['test' => 'post-test','classroomID' => $classroomID]) }}">Kerjakan post test</a></li>
+                            <a class="dropdown-item" 
+    href="{{ route('reguler.test.do', ['test' => 'post-test', 'classroomID' => $classroomID]) }}"
+    @if(!$canTakePostTest) 
+        onclick="alert('Anda harus menonton semua modul selama minimal 20 menit sebelum bisa mengerjakan post-test.'); return false;"
+    @endif>
+    Kerjakan post-test
+</a>
+
                                 <li><a class="dropdown-item" href="{{ route('reguler.classroom.out', ['classroomID' => $classroomID]) }}" onclick="return confirm('Apakah anda yakin ingin keluar dari kelas ini?')">Keluar kelas</a></li>
                             </ul>
                         </div>

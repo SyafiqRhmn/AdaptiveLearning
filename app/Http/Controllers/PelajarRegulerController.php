@@ -324,6 +324,28 @@ class PelajarRegulerController extends Controller
         // $query->where('classroom_id', $classroomID); })->orderBy('id')->get();
         // if ($subjects->isEmpty()) {
         $subjects = Subject::where('classroom_id', $classroomID)->get();
+    
+        // Ambil semua modul yang terkait dengan kelas dan pengguna
+        $modulData = JalurPembelajaran::where('user_id', Auth::id())
+                        ->where('user_id', $user->id)
+                        ->whereHas('subject', function ($query) use ($classroomID) { 
+                            $query->where('classroom_id', $classroomID);})
+                        ->get();
+        // Jika tidak ada modul terkait classroom ini, otomatis tidak bisa post-test
+        $canTakePostTest = $modulData->isNotEmpty(); 
+
+        if ($canTakePostTest) {
+            // Jika modul ditemukan, periksa apakah sudah menonton minimal 20 menit
+            foreach ($modulData as $modul) {
+                $takentime = strtotime($modul->endtime_video) - strtotime($modul->starttime_video);
+
+                // Jika ada modul yang belum ditonton selama 20 menit, tidak bisa ambil post-test
+                if ($takentime < 1200) {
+                    $canTakePostTest = false; // Set menjadi false jika durasi kurang dari 20 menit
+                    break;
+                }
+            }
+        }
         // }
         
         // $hasilTestPelajar = HasilTestPelajar::where('user_id', Auth::user()->id)->where('testable_type', 'pre-test')->get();
@@ -354,12 +376,36 @@ class PelajarRegulerController extends Controller
             'title' => $class->name,
             'classroomID' => $classroomID,
             // 'test' => $test,
+            'canTakePostTest' => $canTakePostTest,
             'class' => $class,
             'subjects' => $subjects,
             'pretest' => $pretest, // Kirim hasil pretest
             // 'startSubject'=> $startSubject,
         ]);
     }
+
+    public function checkPostTest()
+{
+    $user = auth()->user();
+    
+    // Ambil semua modul yang telah diakses siswa
+    $modulData = DB::table('jalur_pembelajarans')
+                    ->where('user_id', $user->id)
+                    ->get();
+
+    foreach ($modulData as $modul) {
+        // Hitung total waktu yang diambil untuk video
+        $takentime = strtotime($modul->endtime_video) - strtotime($modul->starttime_video);
+        
+        // Jika waktu kurang dari 20 menit (1200 detik), batalkan akses ke post-test
+        if ($takentime < 1200) {
+            return redirect()->back()->withErrors(['message' => 'Anda harus menonton modul selama minimal 20 menit sebelum mengerjakan post-test.']);
+        }
+    }
+    
+    // Jika semua modul telah dilihat selama minimal 20 menit
+    return redirect()->route('reguler.test.do', ['test' => 'post-test', 'classroomID' => $classroomID]);
+}
 
     public function Regulertest_do($jenis_test, $classroomID)
 {
