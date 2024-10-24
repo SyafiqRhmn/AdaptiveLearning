@@ -116,6 +116,11 @@ class PelajarRegulerController extends Controller
             $aValue = $matrix['A'][$index] ?? 0; // Nilai A
             $kValue = $matrix['K'][$index] ?? 0; // Nilai K
 
+            // // Normalisasi (nilai / 5) (punya wasil)
+            // $normalized_v = $vValue / 5;
+            // $normalized_a = $aValue / 5;
+            // $normalized_k = $kValue / 5;
+
             // Normalisasi
             $denominator = sqrt(pow($vValue, 2) + pow($aValue, 2) + pow($kValue, 2));
             $normalized_v = ($denominator != 0) ? $vValue / $denominator : 0;
@@ -127,7 +132,7 @@ class PelajarRegulerController extends Controller
             $normalized_matrix['A'][] = $normalized_a;
             $normalized_matrix['K'][] = $normalized_k;
         }
-
+        
         return ([
             'matrix' => $matrix,
             'normalized_matrix' => $normalized_matrix,
@@ -225,6 +230,18 @@ class PelajarRegulerController extends Controller
                     ? ($ideal_positif[$kriteria] + $ideal_negatif[$kriteria]) 
                     : 1); // Hindari pembagian dengan nol
         }
+        //  // Hitung preferensi berdasarkan total penjumlahan dari semua kriteria (punya wasil)
+        // foreach ($answers as $answer) {
+        //     $kuisionersId = $answer->kuisioners_id;
+
+        //     if ($kuisionersId >= 1 && $kuisionersId <= 5) {
+        //         $preferensi['V'] = ($preferensi['V'] ?? 0) + $matrix['V'][$kuisionersId - 1];
+        //     } elseif ($kuisionersId >= 6 && $kuisionersId <= 10) {
+        //         $preferensi['A'] = ($preferensi['A'] ?? 0) + $matrix['A'][$kuisionersId - 6];
+        //     } elseif ($kuisionersId >= 11 && $kuisionersId <= 15) {
+        //         $preferensi['K'] = ($preferensi['K'] ?? 0) + $matrix['K'][$kuisionersId - 11];
+        //     }
+        // }
 
         // Mengurutkan preferensi dan menentukan ranking
         arsort($preferensi); // Mengurutkan preferensi secara menurun
