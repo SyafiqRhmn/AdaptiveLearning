@@ -74,7 +74,7 @@
                             <select name="role" class="form-select @error('role') is-invalid @enderror" id="role">
                                 <option disabled {{ old('role') ? '' : 'selected' }}>Pilih Role</option>
                                 <option value="pelajar" {{ old('role') == 'pelajar' ? 'selected' : '' }}>Pelajar</option>
-                                <option value="pelajar" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>                            
+                                <!-- <option value="pelajar" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>                             -->
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -85,7 +85,7 @@
                             <select name="tipe" class="form-select @error('tipe') is-invalid @enderror" id="tipe">
                                 <option disabled {{ old('tipe') ? '' : 'selected' }}>Pilih Tipe</option>
                                 <option value="reguler" {{ old('tipe') == 'reguler' ? 'selected' : '' }}>Reguler</option>
-                                <option value="adaptive" {{ old('tipe') == 'adaptive' ? 'selected' : '' }}>Adaptive</option>
+                                <!-- <option value="adaptive" {{ old('tipe') == 'adaptive' ? 'selected' : '' }}>Adaptive</option> -->
                             </select>
                             @error('tipe')
                                 <div class="invalid-feedback">{{ $message }}</div>

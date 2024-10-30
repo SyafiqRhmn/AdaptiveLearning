@@ -580,31 +580,53 @@ class PelajarRegulerController extends Controller
     }
     public function startTimer($subjectID)
     {
-        $subject = Subject::find($subjectID);
-        $User = Auth::user();
-        $time = JalurPembelajaran::where('subject_id', $subject->id)->where('user_id', $User->id)->first();
-        if (!$time) {
-            return response()->json(['error' => 'Timer not found'], 404); }
-        $time->start_time = Carbon::now();
-        $time->save();
-        
-        return response()->json(['message' => 'Timer started successfully']);
+        $user = Auth::user();
+        $jalurPembelajaran = JalurPembelajaran::where('subject_id', $subjectID)
+            ->where('user_id', $user->id)
+            ->first();
+    
+        if (!$jalurPembelajaran) {
+            return response()->json(['error' => 'Timer not found'], 404);
+        }
+    
+        // Mengembalikan taken_time dengan nilai default 0 jika null
+        return response()->json(['taken_time' => $jalurPembelajaran->taken_time ?? 0]);
     }
     
     public function endTimer($subjectID)
-    {
-        $subject = Subject::find($subjectID);
-        $User = Auth::user();
-        $timer = JalurPembelajaran::where('subject_id', $subject->id)
-                ->where('user_id', $User->id)
-                ->first();
-        if (!$timer) {
-            return response()->json(['error' => 'Timer not found'], 404); }
-        $timer->end_time = Carbon::now();
-        $timer->save();
-    
-        return response()->json(['message' => 'Timer started successfully']);
+{
+    $subject = Subject::find($subjectID);
+    $user = Auth::user();
+    $timer = JalurPembelajaran::where('subject_id', $subject->id)
+        ->where('user_id', $user->id)
+        ->first();
+
+        // Debug: Tampilkan isi dari $timer
+    dd($timer);
+    if (!$timer) {
+        return response()->json(['error' => 'Timer not found'], 404);
     }
+
+    // Set end_time
+    $timer->end_time = Carbon::now();
+
+    // Hitung taken_time
+    if ($timer->start_time && $timer->end_time) {
+        $startTime = Carbon::parse($timer->start_time);
+        $endTime = Carbon::parse($timer->end_time);
+        $timer->taken_time = $endTime->diffInSeconds($startTime); // Menghitung dalam detik
+    }
+
+    // Simpan timer
+    $timer->save();
+
+    return response()->json(['message' => 'Timer ended successfully', 'taken_time' => $timer->taken_time]);
+}
+    public function displayPdf($subject)
+    {
+        return view('pdf-view', ['filePath' => asset('storage/' . $subject->path)]);
+    }
+
     public function takenTimer($subjectID)
 {
     $subject = Subject::find($subjectID);
@@ -640,13 +662,17 @@ class PelajarRegulerController extends Controller
         ->where('user_id', Auth::id()) // Menambahkan filter berdasarkan user yang terautentikasi
         ->first();
         $classroom = Classroom::find($subject->classroom_id);
-        
-    return view('dashboard.nonpersonalisasi.modul.pdf', [
-        'title' => 'Pelajari Materi',
-        'classroom' => $classroom,
-        'subject' => $subject
-    ]);
+        // Path ke file PDF
+        $filePath = asset('storage/' . $subject->path);
+
+        return view('dashboard.nonpersonalisasi.modul.pdf', [
+            'title' => 'Pelajari Materi',
+            'classroom' => $classroom,
+            'subject' => $subject,
+            'filePath' => $filePath, //
+        ]);
     }
+
     public function video_link($subjectID){
         $subject = Subject::find($subjectID);
         $jalurPembelajaran = JalurPembelajaran::where('subject_id', $subject->id)

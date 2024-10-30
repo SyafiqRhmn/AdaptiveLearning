@@ -15,7 +15,7 @@
                 <h3>{{ $classroom->name }}</h3>
                 <iframe src="https://www.programiz.com/python-programming/online-compiler/#google_vignette" width="100%" height="600"></iframe>
                 <a href="{{ route('reguler.my-class.classroom', [$classroom->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;">kembali</a>
-                <a href="{{ route('reguler.subjecttest.do', ['test'=> 'course-test','subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;"onclick="endAndCalculate('{{ $subject->id }}')">Lanjut</a>           
+                <!-- <a href="{{ route('reguler.subjecttest.do', ['test'=> 'course-test','subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;"onclick="endAndCalculate('{{ $subject->id }}')">Lanjut</a>            -->
             </div>
         </div>
     </div>

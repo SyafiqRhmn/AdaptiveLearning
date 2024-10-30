@@ -46,7 +46,7 @@ class SubjectController extends Controller
         $subject = new Subject;
         if ($request->hasFile('subject')) {
             $file = $request->file('subject');
-            $subject->path = $file->store('moduls'); // Menyimpan file di folder "public/moduls"
+            $subject->path = $file->store('public/moduls'); // Menyimpan file di folder "public/moduls"
             $subject->subject = $file->getClientOriginalName(); // Mendapatkan nama file yang disimpan
         }
     
@@ -99,12 +99,12 @@ class SubjectController extends Controller
 
             if ($subject->subject !== null) {
                 // Hapus file subject yang lama (jika ada)
-                Storage::delete($subject->path);
+                Storage::delete('public/moduls/' . $subject->path);
             }
 
             // Simpan file subject yang baru
             $file = $request->file('subject');
-            $subject->path = $file->store('moduls');
+            $subject->path = $file->store('moduls', 'public');
             $subject->subject = $file->getClientOriginalName();
         }
 

@@ -17,64 +17,58 @@
                 <h3>{{ $classroom->name }}</h3>
                 <iframe width="560" height="315" src="{{ $subject->video_link }}" frameborder="0" allowfullscreen></iframe>
                 <a href="{{ route('reguler.my-class.classroom', [$classroom->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;">kembali</a>
-                <a href="{{ route('reguler.subjecttest.do', ['test'=> 'course-test','subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;" onclick="endAndCalculate('{{ $subject->id }}');">Lanjut</a>
+                <!-- <a href="{{ route('reguler.subjecttest.do', ['test'=> 'course-test','subjectID' => $subject->id]) }}" class="btn btn-primary mt-4" style="max-width: 110px;" onclick="endAndCalculate('{{ $subject->id }}');">Lanjut</a> -->
               </div>              
             </div>
         </div>
     </div>
     <script>
-              // Fungsi untuk memulai timer
-              function startTimer() {
-                startTime = new Date();
-                timerInterval = setInterval(updateTimer, 1000);  // Update timer setiap detik
-              }
+              let timerInterval;
+let startTime;
+let elapsedSeconds = 0;
 
-              // Fungsi untuk mengupdate timer
-              function updateTimer() {
-                const currentTime = new Date();
-                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
-                const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
-                const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `Waktu: ${minutes}:${seconds}`;
-              }
+function startTimer(taken = 0) {
+  elapsedSeconds = taken;
+  startTime = new Date();
+  timerInterval = setInterval(updateTimer, 1000);
+}
 
-              startTimer();  // Panggil fungsi startTimer() untuk memulai timer
-              function endTimer(subjectId) {
-  console.log(subjectId);
-  // Lakukan permintaan PUT untuk memulai timer
-  fetch(`{{ url('reguler/end-timer-video') }}/${subjectId}`, {
+function updateTimer() {
+  const currentTime = new Date();
+  const totalSeconds = elapsedSeconds + Math.floor((currentTime - startTime) / 1000);
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  document.getElementById('timer').innerText = `Waktu: ${minutes}:${seconds}`;
+}
+
+function pauseTimer(subjectId) {
+  clearInterval(timerInterval);
+  const totalElapsed = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
+
+  fetch(`{{ url('reguler/end-timer') }}/${subjectId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "Accept": "application/json",
       "X-CSRF-Token": "{{ csrf_token() }}"
-    }
+    },
+    body: JSON.stringify({ taken_time: totalElapsed })
   })
   .then(response => response.json())
   .then(data => console.log(data))
   .catch(error => console.error("Error:", error));
 }
-function calculateTakenTime(subjectId) {
-        // Lakukan permintaan PUT untuk menghitung taken time
-        fetch(`{{ route('reguler.takentimervideo', ['subjectID' => $subject->id]) }}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-CSRF-Token": "{{ csrf_token() }}"
-            }
-        })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error("Error:", error));
-    }
-    function endAndCalculate(subjectId) {
-        // Panggil endTimer
-        endTimer(subjectId);
 
-        // Panggil calculateTakenTime
-        calculateTakenTime(subjectId);
-    }
+// Mulai dari `taken_time` yang sudah disimpan
+document.addEventListener("DOMContentLoaded", function() {
+  const subjectId = {{ $subject->id }};
+  fetch(`{{ url('reguler/start-timer') }}/${subjectId}`)
+    .then(response => response.json())
+    .then(data => {
+      startTimer(data.taken_time);
+    })
+    .catch(error => console.error("Error:", error));
+});
 
             </script>
 
