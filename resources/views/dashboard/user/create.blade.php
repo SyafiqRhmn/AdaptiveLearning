@@ -46,6 +46,7 @@
                         <option value="pelajar" {{ old('role') == 'pelajar' ? 'selected' : '' }}>Pelajar</option>
                         <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru</option>
                         <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="pakar" {{ old('role') == 'pakar' ? 'selected' : '' }}>Pakar</option>
                     </select>
                     @error('role')
                         <div class="invalid-feedback">{{ $message }}</div>

@@ -14,7 +14,10 @@
             <a class="nav-link" href="/user/pelajar">Data Pelajar</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/user/guru">Data Guru</a>
+            <a class="nav-link" href="/user/dosen">Data Dosen</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/user/pakar">Data Pakar</a>
           </li>
         @endcan
       </ul>

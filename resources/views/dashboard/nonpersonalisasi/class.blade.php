@@ -16,13 +16,12 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item" 
-    href="{{ route('reguler.test.do', ['test' => 'post-test', 'classroomID' => $classroomID]) }}"
-    @if(!$canTakePostTest) 
-        onclick="alert('Anda harus menonton semua modul selama minimal 20 menit sebelum bisa mengerjakan post-test.'); return false;"
-    @endif>
-    Kerjakan post-test
-</a>
-
+                                href="{{ route('reguler.test.do', ['test' => 'post-test', 'classroomID' => $classroomID]) }}" 
+                                @if(!$pretest) 
+                                    onclick="alert('Anda belum mengerjakan pre-test.'); return false;"
+                                @endif>
+                                Kerjakan post-test
+                            </a>
                                 <li><a class="dropdown-item" href="{{ route('reguler.classroom.out', ['classroomID' => $classroomID]) }}" onclick="return confirm('Apakah anda yakin ingin keluar dari kelas ini?')">Keluar kelas</a></li>
                             </ul>
                         </div>
@@ -44,8 +43,17 @@
                             <form action="" method="post">
                                 @csrf
                                 @method('PUT')
-                                <a onclick="startPretest()" class="btn btn-primary text-center mb-3">Kerjakan pre test</a> <!-- Menambahkan margin bawah -->
+                                <a 
+                                    href="#" 
+                                    class="btn btn-primary text-center mb-3" 
+                                    @if(!$cekkuisioner) 
+                                        onclick="alert('Anda belum mengisi kuisioner.'); return false;"
+                                    @else
+                                        onclick="startPretest()"
+                                    @endif
+                                >Kerjakan pre test</a> <!-- Menambahkan margin bawah -->
                             </form>
+
                             {{-- Tetap tampilkan semua modul meski pre-test belum dikerjakan --}}
                             @foreach ($subjects as $subject)
                                 <a href="#" class="btn btn-outline-secondary text-left my-2 p-2" disabled>

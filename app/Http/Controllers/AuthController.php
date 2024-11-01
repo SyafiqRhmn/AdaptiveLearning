@@ -49,7 +49,7 @@ class AuthController extends Controller
             'password' => 'required|min:6|max:255|confirmed',
             'program_studi' => 'required|max:255',
             'kelas'=> 'required|in:A,B,C,D,E,F,G,H',
-            'role' => 'required|in:pelajar,guru,admin',
+            'role' => 'required|in:pelajar,guru,admin,pakar',
             'tipe' => 'required|in:reguler,adaptive',
         ]);
 

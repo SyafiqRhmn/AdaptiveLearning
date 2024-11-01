@@ -25,7 +25,7 @@
             <input type="email" class="form-control" id="email" name="email" value="{{ $myprofile->email }}">
         </div>
 
-        <div class="form-group">
+        <div class="form-group" hidden>
         <label for="tipe">Tipe:</label>
             <select class="form-control" id="tipe" name="tipe">
                 <option value="adaptive" {{ $myprofile->tipe === 'adaptive' ? 'selected' : '' }}>adaptive</option>

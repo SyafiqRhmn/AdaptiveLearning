@@ -13,22 +13,27 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('dashboard.user.index', ['title' => 'Data User', 'users' => User::paginate(10)]);
+        return view('dashboard.user.index', ['title' => 'Data User', 'users' => User::latest()->paginate(10)]);
     }
     
     public function pelajaradaptive()
     {
-        return view('dashboard.user.index', ['title' => 'Data User Pelajar Adaptive', 'users' => User::where('tipe', 'adaptive')->paginate(10)]);
+        return view('dashboard.user.index', ['title' => 'Data User Pelajar Adaptive', 'users' => User::where('tipe', 'adaptive')->orderBy('created_at', 'desc')->paginate(10)]);
     }
     public function pelajarreguler()
     {
-        return view('dashboard.nonpersonalisasi.index', ['title' => 'Data User Pelajar Reguler', 'users' => User::where('tipe', 'reguler')->paginate(10)]);
+        return view('dashboard.user.index', ['title' => 'Data User Pelajar Reguler', 'users' => User::where('tipe', 'reguler')->where('role', 'pelajar')->orderBy('created_at', 'desc')->paginate(10)]);
     }
-    
     public function guru()
     {
-        return view('dashboard.user.index', ['title' => 'Data User Guru', 'users' => User::where('role', 'guru')->paginate(10)]);
+        return view('dashboard.user.index', ['title' => 'Data User Dosen', 'users' => User::where('role', 'guru')->orderBy('created_at', 'desc')->paginate(10)]);
     }
+    public function pakar()
+    {
+        return view('dashboard.user.index', ['title' => 'Data User Pakar', 'users' => User::where('role', 'pakar')->orderBy('created_at', 'desc')->paginate(10)]);
+    }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -56,7 +61,7 @@ class UserController extends Controller
             'nim' => 'required|numeric',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6|confirmed',
-            'role' => 'required|in:pelajar,guru,admin',
+            'role' => 'required|in:pelajar,guru,admin,pakar',
         ]);
 
         // Proses penyimpanan data ke database
@@ -109,7 +114,7 @@ class UserController extends Controller
             'nim' => 'required',
             'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => 'nullable|min:8|confirmed',
-            'role' => 'required|in:admin,pelajar,guru',
+            'role' => 'required|in:admin,pelajar,guru,pakar',
             'tipe' => 'required|in:reguler,adaptive',
         ]);
 

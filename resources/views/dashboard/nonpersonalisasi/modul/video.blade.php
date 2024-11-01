@@ -12,7 +12,7 @@
             <div class="col">
               <div class="card p-4">
               <div>
-              <span id="timer">Waktu: 00:00</span>
+              <!-- <span id="timer">Waktu: 00:00</span> -->
             </div>
                 <h3>{{ $classroom->name }}</h3>
                 <iframe width="560" height="315" src="{{ $subject->video_link }}" frameborder="0" allowfullscreen></iframe>

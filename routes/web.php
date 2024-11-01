@@ -15,8 +15,8 @@ use App\Http\Controllers\PostTestController;
 use App\Http\Controllers\CourseTestController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ClassroomController;
-use App\Http\Controllers\QuesionerPelajarController;
-use App\Http\Controllers\QuesionerGuruController;
+use App\Http\Controllers\PakarPelajarController;
+use App\Http\Controllers\PakarController;
 use App\Http\Controllers\SoalJabawanController;
 use App\Http\Controllers\SoalJawabanController;
 use App\Http\Controllers\PelajarRegulerController;
@@ -46,6 +46,9 @@ Route::get('/home', function () {
     elseif (Auth::user()->role === 'guru') {
         return redirect()->route('classroom.index');
     }
+    elseif (Auth::user()->role === 'pakar') {
+        return redirect()->route('qu-dosen.index');
+    }
     elseif (Auth::user()->role === 'pelajar') {
         if (Auth::user()->tipe === 'reguler') {
             return redirect('/reguler/dashboard/nonpersonalisasi');
@@ -73,6 +76,9 @@ Route::middleware(['auth'])->group(function () {
         if (Auth::user()->role === 'guru') {
             return redirect()->route('classroom.index');
         }
+        if (Auth::user()->role === 'pakar') {
+            return redirect()->route('qu-dosen.index');
+        }
         if (Auth::user()->role === 'pelajar') {
             if (Auth::user()->tipe == 'adaptive'){
                 return view('dashboard.index', [
@@ -92,10 +98,16 @@ Route::middleware(['auth'])->group(function () {
     });
     Route::get('/logout', [AuthController::class, 'logout']);
     // route grup guru
+    Route::middleware(['pakar'])->group(function () {
+        Route::resource('/quesioner/qu-dosen', PakarController::class);
+        Route::post('/quesioner/qu-dosen/matrix', [PakarController::class, 'storeMatrix'])->name('qu-dosen.matrix');
+        Route::resource('/quesioner/qu-pelajar', PakarPelajarController::class);
+        Route::post('/quesioner/qu-dosen/destroy', [PakarController::class, 'destroy'])->name('qu-dosen.destroy');
+
+
+
+    });
     Route::middleware(['guru'])->group(function () {
-        Route::resource('/quesioner/qu-guru', QuesionerGuruController::class);
-        Route::post('/quesioner/qu-guru/matrix', [QuesionerGuruController::class, 'storeMatrix'])->name('qu-guru.matrix');
-        Route::resource('/quesioner/qu-pelajar', QuesionerPelajarController::class);
         Route::resource('/classroom', ClassroomController::class);
         Route::resource('/subject', SubjectController::class);
         Route::resource('/test/pre-test', PreTestController::class);
@@ -159,8 +171,9 @@ Route::middleware(['auth'])->group(function () {
      // route grup admin
      Route::middleware(['admin'])->group(function () {
         Route::get('/dashboard', [UserController::class, 'index']);
-        Route::get('/user/pelajar', [UserController::class, 'pelajar']);
-        Route::get('/user/guru', [UserController::class, 'guru']);
+        Route::get('/user/pelajar', [UserController::class, 'pelajarreguler']);
+        Route::get('/user/dosen', [UserController::class, 'guru']);
+        Route::get('/user/pakar', [UserController::class, 'pakar']);
         Route::get('/reset-password/{id}', [UserController::class, 'resetPassword'])->name('reset.password');
         Route::resource('/user', UserController::class);
     });
@@ -172,6 +185,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard/nonpersonalisasi', [PelajarRegulerController::class, 'index']);
         Route::post('/dashboard/nonpersonalisasi/kuisioner', [PelajarRegulerController::class, 'saveKuisioner'])->name('reguler.saveKuisioner');;
         Route::get('/kuisioner', [PelajarRegulerController::class, 'index'])->name('reguler.kuisioner');
+        Route::get('/kuisioner/perhitungan', [PelajarRegulerController::class, 'perhitungan'])->name('reguler.perhitungan');
         Route::get('/my-class', [PelajarRegulerController::class, 'my_class'])->name('reguler.my-class');
         Route::get('/my-class/{classroom}', [PelajarRegulerController::class, 'my_classReguler'])->name('reguler.my-class.classroom');
         Route::get('/all-class', [PelajarRegulerController::class, 'allClassReguler'])->name('reguler.all-class');

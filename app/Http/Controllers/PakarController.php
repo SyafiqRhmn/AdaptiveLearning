@@ -14,7 +14,7 @@ use App\Models\QuesionerGuru;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateQuesionerRequest;
 
-class QuesionerGuruController extends Controller
+class PakarController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,39 +41,36 @@ class QuesionerGuruController extends Controller
     // Perkalian matriks
     $resultMatrix = $this->multiplyMatrices($matrix);
     // Hitung hasil AHP menggunakan matriks yang sudah dibentuk
-    $ahpResults = $this->calculateAHPResults($resultMatrix, $totalCol);
+    $ahpResults = $this->calculateAHPResults($resultMatrix, $totalCol, $kriteria);
 
-    if ($kriteriaExists) {
-        return view('dashboard.guru.qu-guru.matrix', [
-            'title' => 'Quesioner Matrix',
-            'kriteria' => $kriteria,
-            'poinCount' => $poinCount,
-            'matrix' => $matrix,
-            'totalCol' => $totalCol,
-            'resultMatrix' => $resultMatrix,
-            'total' => $ahpResults['total'],
-            'ev' => $ahpResults['ev'],
-            'emax' => $ahpResults['emax'],
-            'ci' => $ahpResults['ci'],
-            'cr' => $ahpResults['cr'],
+
+    return view('dashboard.pakar.qu-dosen.index', [
+        'title' => 'Quesioner Dosen',
+        'kriteria' => $kriteria,
+        'kuisioners' => $kuisioners,
+        'quesioner' => $quesioners,
+        'poinCount' => $poinCount,
+        'counter' => $counter,
+        'kriteria' => $kriteria,
+        'poinCount' => $poinCount,
+        'matrix' => $matrix,
+        'kriteriaExists' =>  $kriteriaExists,
+        'totalCol' => $totalCol,
+        'resultMatrix' => $resultMatrix,
+        'total' => $ahpResults['total'],
+        'ev' => $ahpResults['ev'],
+        'emax' => $ahpResults['emax'],
+        'ci' => $ahpResults['ci'],
+        'cr' => $ahpResults['cr'],
         ]);
-    } else {
-        // Jika tidak ada, kembali ke halaman pemilihan kriteria
-        return view('dashboard.guru.qu-guru.index', [
-            'title' => 'Quesioner Guru',
-            'kriteria' => $kriteria,
-            'kuisioners' => $kuisioners,
-            'quesioner' => $quesioners,
-            'poinCount' => $poinCount,
-            'counter' => $counter
-            ]);
-    }
+    
     
     }   
 
 
     public function storeMatrix(Request $request)
     {
+
         // Ambil semua input yang diajukan
         $data = $request->except('_token'); // Mengabaikan token CSRF
         // Loop untuk menyimpan nilai ke dalam model
@@ -96,17 +93,11 @@ class QuesionerGuruController extends Controller
                 }
             }
         }
-
-        // Redirect atau tampilkan pesan sukses
-        return redirect()->route('qu-guru.index')->with('success', 'Data berhasil disimpan.');
-    }
-
-    public function show($kriteria)
-    {
+        $poinCount = QuesionerGuru::where('kriteria', $kriteria)->count();; 
+        $counter = 1;
         // Ambil data perbandingan untuk kriteria yang dipilih dari tabel 'kriteria_values'
-        $comparisons = KriteriaValue::All();
-        // Inisialisasi array matriks
-        $poinCount = QuesionerGuru::where('kriteria', $kriteria)->count(); // Misalnya ada 5 poin (V1, V2, V3, V4, V5)
+        $comparisons = KriteriaValue::where('kriteria', $kriteria)->get();
+        
         // Inisialisasi matriks
         $result = $this->initializeMatrix($poinCount, $comparisons);
         $matrix = $result['matrix'];
@@ -114,24 +105,14 @@ class QuesionerGuruController extends Controller
         // Perkalian matriks
         $resultMatrix = $this->multiplyMatrices($matrix);
         // Hitung hasil AHP menggunakan matriks yang sudah dibentuk
-        $ahpResults = $this->calculateAHPResults($resultMatrix, $totalCol);
+        $ahpResults = $this->calculateAHPResults($resultMatrix, $totalCol, $kriteria);
+        
 
-        // Kirim matriks ke view untuk ditampilkan
-        return view('dashboard.guru.qu-guru.matrix', [
-            'title' => 'Quesioner Matrix',
-            'kriteria' => $kriteria,
-            'poinCount' => $poinCount,
-            'matrix' => $matrix,
-            'totalCol' => $totalCol,
-            'resultMatrix' => $resultMatrix,
-            'total' => $ahpResults['total'],
-            'ev' => $ahpResults['ev'],
-            'emax' => $ahpResults['emax'],
-            'ci' => $ahpResults['ci'],
-            'cr' => $ahpResults['cr'],
-        ]);
+        // Redirect atau tampilkan pesan sukses
+        return redirect()->route('qu-dosen.index')->with('success', 'Data berhasil disimpan.');
     }
 
+    
     public function initializeMatrix($poinCount, $comparisons)
     {
         $matrix = [];
@@ -191,62 +172,84 @@ class QuesionerGuruController extends Controller
         return $result; 
     }
 
-    public function calculateAHPResults($matrix, $totalCol)
-    {
-        // Hitung total dan EV
-        $total = [];
-        $ev = [];
-        $poinCount = count($matrix);
-        // Hitung total setiap baris
-        for ($i = 1; $i <= $poinCount; $i++) {
-            $rowTotal = 0; // Inisialisasi total untuk baris ke-i
-            for ($j = 1; $j <= $poinCount; $j++) {
-                $rowTotal += $matrix[$i][$j] ?? 0; // Penjumlahan setiap elemen baris
-            }
-            $total[$i] = $rowTotal; // Simpan total baris
-        }
+    public function calculateAHPResults($matrix, $totalCol, $kriteria)
+{
+    // Hitung total dan EV
     
-        // Hitung EV dan Total keseluruhan
-        $totalSum = array_sum($total); // Hitung jumlah total seluruh baris
-        for ($i = 1; $i <= $poinCount; $i++) {
-            $ev[$i] = $total[$i] / ($totalSum > 0 ? $totalSum : 1); // Normalisasi EV
+    $total = [];
+    $ev = [];
+    $poinCount = count($matrix);
+    
+    // Hitung total setiap baris
+    for ($i = 1; $i <= $poinCount; $i++) {
+        $rowTotal = 0; // Inisialisasi total untuk baris ke-i
+        for ($j = 1; $j <= $poinCount; $j++) {
+            $rowTotal += $matrix[$i][$j] ?? 0; // Penjumlahan setiap elemen baris
         }
-        // Simpan nilai EV ke tabel baru
-        foreach ($ev as $i => $evValue) {
-            // Tentukan kriteria berdasarkan indeks
-            $kriteriaPrefix = '';
-            if ($i <= 5) { // Misalnya, 1 dan 2 adalah kriteria V
-                $kriteriaPrefix = 'V';
-            } elseif ($i <= 10) { // Misalnya, 3 dan 4 adalah kriteria A
-                $kriteriaPrefix = 'A';
-            } else { // Misalnya, 5 adalah kriteria K
-                $kriteriaPrefix = 'K';
-            }
-            Ev::updateOrCreate(
-                ['kuisioners_id' => $i, 'kriteria' => $kriteriaPrefix.$i], // Sesuaikan kriteria
-                ['ev_value' => $evValue] // Simpan nilai EV
-            );
+        $total[$i] = $rowTotal; // Simpan total baris
+    }
+
+    // Hitung EV dan Total keseluruhan
+    $totalSum = array_sum($total); // Hitung jumlah total seluruh baris
+    for ($i = 1; $i <= $poinCount; $i++) {
+        $ev[$i] = $total[$i] / ($totalSum > 0 ? $totalSum : 1); // Normalisasi EV
+    }
+    
+    foreach ($ev as $i => $evValue) {
+        // Tentukan kriteria berdasarkan parameter yang diberikan
+        $kriteriaPrefix = '';
+        $kuisioners_id = 0; // Inisialisasi kuisioners_id
+
+        if ($kriteria === 'V') {
+            $kriteriaPrefix = 'V';
+            $kuisioners_id = $i; // 1-5
+        } elseif ($kriteria === 'A') {
+            $kriteriaPrefix = 'A';
+            $kuisioners_id = $i + 5; // 6-10
+        } elseif ($kriteria === 'K') {
+            $kriteriaPrefix = 'K';
+            $kuisioners_id = $i + 10; // 11-15
         }
 
-        // Hitung Emax dari total kolom dan EV
-        $emax = 0;
-        foreach ($totalCol as $i => $columnTotal) {
-            $emax += $columnTotal * $ev[$i]; // Kalikan total kolom dengan EV
-        }
-    
-        // Hitung CI dan CR
-        $n = $poinCount; // Jumlah kriteria
-        $ci = ($emax - $n) / ($n - 1);
-        $ri = $this->getRIValue($n); // Ambil nilai RI berdasarkan jumlah kriteria
-        $cr = $ri > 0 ? $ci / $ri : 0; // Pengecekan untuk CR
-    
-        return [
-            'total' => $total,
-            'ev' => $ev,
-            'emax' => $emax,
-            'ci' => $ci,
-            'cr' => $cr,
-        ];
+        Ev::updateOrCreate(
+            ['kuisioners_id' => $kuisioners_id, 'kriteria' => $kriteriaPrefix.$i], // Sesuaikan kriteria
+            ['ev_value' => $evValue] // Simpan nilai EV
+        );
+    }
+
+    // Hitung Emax dari total kolom dan EV
+    $emax = 0;
+    foreach ($totalCol as $i => $columnTotal) {
+        $emax += $columnTotal * ($ev[$i] ?? 0); // Kalikan total kolom dengan EV
+    }
+
+    // Hitung CI dan CR
+    $n = $poinCount; // Jumlah kriteria
+    $ci = ($emax - $n) / ($n - 1);
+    $ri = $this->getRIValue($n); // Ambil nilai RI berdasarkan jumlah kriteria
+    $cr = $ri > 0 ? $ci / $ri : 0; // Pengecekan untuk CR
+
+    return [
+        'total' => $total,
+        'ev' => $ev,
+        'emax' => $emax,
+        'ci' => $ci,
+        'cr' => $cr,
+    ];
+}
+
+
+    public function destroy(Request $request)
+    {
+    // Ambil kriteria dari input form
+    $kriteria = $request->input('kriteria');
+
+    // Hapus data dari model 'Ev' berdasarkan kriteria
+    Ev::where('kriteria', $kriteria)->delete();
+
+    // Hapus data dari model 'KriteriaValue' berdasarkan kriteria
+    KriteriaValue::where('kriteria', $kriteria)->delete();
+        return redirect()->route('qu-dosen.index')->with('success', 'Quesioner berhasil dihapus');
     }
 
     private function getRIValue($n)

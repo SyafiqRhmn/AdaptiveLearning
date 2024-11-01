@@ -69,22 +69,22 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror                            
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3" hidden>
                             <label for="role" class="form-label">Role</label>
                             <select name="role" class="form-select @error('role') is-invalid @enderror" id="role">
-                                <option disabled {{ old('role') ? '' : 'selected' }}>Pilih Role</option>
-                                <option value="pelajar" {{ old('role') == 'pelajar' ? 'selected' : '' }}>Pelajar</option>
+                                <option disabled {{ old('role') ? 'selected' : '' }}>Pilih Role</option>
+                                <option value="pelajar" {{ old('role') == 'pelajar' ? '' : 'selected' }}>Pelajar</option>
                                 <!-- <option value="pelajar" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>                             -->
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror                            
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3" hidden>
                             <label for="tipe" class="form-label">Tipe</label>
                             <select name="tipe" class="form-select @error('tipe') is-invalid @enderror" id="tipe">
                                 <option disabled {{ old('tipe') ? '' : 'selected' }}>Pilih Tipe</option>
-                                <option value="reguler" {{ old('tipe') == 'reguler' ? 'selected' : '' }}>Reguler</option>
+                                <option value="reguler" {{ old('tipe') == 'reguler' ? '' : 'selected' }}>Reguler</option>
                                 <!-- <option value="adaptive" {{ old('tipe') == 'adaptive' ? 'selected' : '' }}>Adaptive</option> -->
                             </select>
                             @error('tipe')

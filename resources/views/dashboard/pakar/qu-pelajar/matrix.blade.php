@@ -94,7 +94,13 @@
                       </tr>
                   </tbody>
               </table>
-              <a href="{{ route('qu-guru.index') }}" class="btn btn-danger"><i class="bi bi-back"></i> Back</a>
+              <a href="{{ route('qu-dosen.index') }}" class="btn btn-danger"><i class="bi bi-back"></i> BACK</a>
+              
+              <form action="{{ route('qu-dosen.destroy') }}" class="d-inline" method="POST">
+                    @csrf
+                    
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah anda yakin ingin menghapus kuisioner?')"><i class="bi bi-trash"></i> RESET</button>
+                </form>
               <div class="d-flex justify-content-end">
                  
               </div>

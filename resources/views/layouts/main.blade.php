@@ -14,7 +14,7 @@
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 
     @isset(Auth::user()->role)    
-        @if (Auth::user()->role === 'guru' || Auth::user()->role === 'pelajar')
+        @if (Auth::user()->role === 'guru' || Auth::user()->role === 'pakar' || Auth::user()->role === 'pelajar')
           <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
           <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
         @endif
@@ -25,6 +25,8 @@
   <body class="d-flex flex-column" style="height: fit-content">
 
     @can('guru')
+      {{-- @include('partials.navbar_guru') --}}
+    @elsecan('pakar')
       {{-- @include('partials.navbar_guru') --}}
     @elsecan('pelajar')
       {{-- @include('partials.navbar_guru') --}}
@@ -37,6 +39,8 @@
       </div>
     
     @can('guru')
+      {{-- @include('partials.sidebar') --}}
+    @elsecan('pakar')
       {{-- @include('partials.sidebar') --}}
     @elsecan('pelajar')
       {{-- @include('partials.sidebar') --}}

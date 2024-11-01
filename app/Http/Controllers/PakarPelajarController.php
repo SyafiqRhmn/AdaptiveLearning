@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreQuesionerRequest;
 use App\Http\Requests\UpdateQuesionerRequest;
 
-class QuesionerPelajarController extends Controller
+class PakarPelajarController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -23,7 +23,7 @@ class QuesionerPelajarController extends Controller
         $no=1;
         $quesioners = QuesionerPelajar::all();
         // dd('dd');
-        return view('dashboard.guru.qu-pelajar.index', [
+        return view('dashboard.pakar.qu-pelajar.index', [
             'title' => 'Quesioner Pelajar',
             'quesioner' => $quesioners,
             'no'    => $no
@@ -35,7 +35,7 @@ class QuesionerPelajarController extends Controller
      */
     public function create()
     {
-        return view('dashboard.guru.qu-pelajar.create', ['title' => 'Buat quesioner baru']);
+        return view('dashboard.pakar.qu-pelajar.create', ['title' => 'Buat quesioner baru']);
     }
     
     /**
@@ -68,7 +68,7 @@ class QuesionerPelajarController extends Controller
     public function edit(QuesionerPelajar $qu_pelajar)
     {
         // Tidak perlu memanggil QuesionerPelajar::find() lagi
-        return view('dashboard.guru.qu-pelajar.edit', [
+        return view('dashboard.pakar.qu-pelajar.edit', [
         'title' => 'Edit Pertanyaan baru', 
         'quesioner' => $qu_pelajar
     ]);

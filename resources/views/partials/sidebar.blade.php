@@ -6,17 +6,6 @@
         {{ Auth::user()->name }}!</p>
         @can('guru')
             <ul class="list-unstyled components mb-5">
-                <li class="{{ Request::is('quesioner*') ? 'active' : '' }}">
-                    <a href="#pagetests" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">Quesioner</a>
-                    <ul class="collapse list-unstyled {{ Request::is('quesioner*') ? 'show' : '' }}" id="pagetests">
-                    <li class="{{ Request::is('quesioner/qu-guru*') ? 'active' : '' }}">
-                        <a href="/quesioner/qu-guru">Quesioner Guru</a>
-                    </li>
-                    <li class="{{ Request::is('quesioner/qu-pelajar*') ? 'active' : '' }}">
-                        <a href="/quesioner/qu-pelajar">Quesioner Pelajar</a>
-                    </li>
-                    </ul>
-                </li>
                 <li class="{{ Request::is('classroom') ? 'active' : '' }}">
                     <a href="/classroom">Classroom</a>
                 </li>
@@ -79,6 +68,21 @@
                 </li>
             </ul>
 
+        @endcan
+        @can('pakar')
+            <ul class="list-unstyled components mb-5">
+                <li class="{{ Request::is('quesioner*') ? 'active' : '' }}">
+                    <a href="#pagetests" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">Quesioner</a>
+                    <ul class="collapse list-unstyled {{ Request::is('quesioner*') ? 'show' : '' }}" id="pagetests">
+                        <li class="{{ Request::is('quesioner/qu-dosen*') ? 'active' : '' }}">
+                            <a href="/quesioner/qu-dosen">Quesioner Dosen</a>
+                        </li>
+                        <li class="{{ Request::is('quesioner/qu-pelajar*') ? 'active' : '' }}">
+                            <a href="/quesioner/qu-pelajar">Quesioner Pelajar</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         @endcan
 <div class="footer">
     <p>Terjadi error? kontak admin : 085852338174 </p>
