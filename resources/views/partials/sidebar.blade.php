@@ -35,6 +35,9 @@
                     </li>
                     </ul>
                 </li>
+                <li class="{{ Request::is('hasil-gaya-pelajar') ? 'active' : '' }}">
+                    <a href="/hasil-gaya-pelajar">Hasil Gaya Pelajar</a>
+                </li>
                 <li class="{{ Request::is('hasil-test-pelajar') ? 'active' : '' }}">
                     <a href="/hasil-test-pelajar">Hasil Test Pelajar</a>
                 </li>

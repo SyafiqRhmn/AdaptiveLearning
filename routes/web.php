@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AnswerController;
+use App\Http\Controllers\HasilGayaBelajarController;
 use App\Http\Controllers\PelajarController;
 use App\Http\Controllers\PreTestController;
 use App\Http\Controllers\SubjectController;
@@ -116,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/test/question', QuestionController::class);
         Route::resource('/test/answer', AnswerController::class);
         Route::resource('/test/soal-jawaban', SoalJawabanController::class);
+        Route::resource('/hasil-gaya-pelajar', HasilGayaBelajarController::class);
         Route::get('/hasil-test-pelajar', function () {
             return view('dashboard.hasil_test_pelajar', [
                 'title' => 'Hasil Test Pelajar',

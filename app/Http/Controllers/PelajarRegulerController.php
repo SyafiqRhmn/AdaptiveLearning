@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Answer;
 use App\Models\AnswerKuisioner;
 use App\Models\Ev;
+use App\Models\HasilGayaBelajar;
 use App\Models\PreTest;
 use App\Models\Subject;
 use App\Models\PostTest;
@@ -272,7 +273,15 @@ class PelajarRegulerController extends Controller
         foreach (array_keys($preferensi) as $key) {
             $ranking[$key] = $counter++; // Menetapkan nilai ranking 1, 2, 3
         }
-
+        // Ambil gaya belajar dengan nilai preferensi tertinggi
+        $highestLearningStyle = key($preferensi); // Gaya belajar dengan preferensi tertinggi (misal 'V', 'A', atau 'K')
+        HasilGayaBelajar::updateOrCreate(
+            ['user_id' => Auth::id()], // Update jika user_id sudah ada, jika belum maka buat baru
+            [
+                'gaya_belajar' => $highestLearningStyle, // Simpan gaya belajar yang paling tinggi
+            
+            ]
+        );
         // Debugging untuk memeriksa hasil
         return ([
             'matrix' => $matrix,
